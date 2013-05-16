@@ -73,7 +73,7 @@
 	<div class="portlet_margin">
 	
 		<ww:if test="skipLanguageTabs != true">
-		
+
 			<ww:if test="event.versions.size() > 1">
 				<p>
 					<ww:property value="this.getLabel('labels.internal.application.languageTranslationTabsIntro')"/>
@@ -81,42 +81,42 @@
 						<ww:property value="this.getParameterizedLabel('labels.internal.application.languageTranslationNewVersionText', #attr.translateEventRenderURL)"/>
 					</ww:if>
 				</p>
-				<ul class="languagesTabs">
-					<ww:iterator value="event.versions" status="rowstatus">
-						<ww:set name="currentLanguageId" value="top.language.id"/>
-						<ww:set name="currentLanguageId" value="top.language.id" scope="page"/>
-						
-						<portlet:renderURL var="viewEventVersionUrl">
-							<portlet:param name="action" value="ViewEvent"/>
-							<calendar:evalParam name="eventId" value="${eventId}"/>
-							<calendar:evalParam name="versionLanguageId" value="${currentLanguageId}"/>
-						</portlet:renderURL>
-							
-						<c:choose>
-							<c:when test="${versionLanguageId == currentLanguageId}">
-								<c:set var="cssClass" value="activeTab"/>
-							</c:when>
-							<c:otherwise>
-								<c:set var="cssClass" value=""/>
-							</c:otherwise>
-						</c:choose>		
-						<li class="<c:out value="${cssClass}"/>">
-							<a href="<c:out value="${viewEventVersionUrl}"/>"><ww:property value="top.language.name"/></a>
-						</li>
-						
-					</ww:iterator>
-				</ul>
 			</ww:if>
 			<ww:else>
 				<ww:if test="event.versions.size() < availableLanguages.size()">
-				<p>
-					<ww:property value="this.getParameterizedLabel('labels.internal.application.languageTranslationNewVersionText', #attr.translateEventRenderURL)"/>
-				</p>
+					<p>
+						<ww:property value="this.getParameterizedLabel('labels.internal.application.languageTranslationNewVersionText', #attr.translateEventRenderURL)"/>
+					</p>
 				</ww:if>
 			</ww:else>
-		
+
+			<ul class="languagesTabs">
+				<ww:iterator value="event.versions" status="rowstatus">
+					<ww:set name="hasVersionForLanguge" value="true"/>
+					<ww:set name="currentLanguageId" value="top.language.id"/>
+					<ww:set name="currentLanguageId" value="top.language.id" scope="page"/>
+
+					<portlet:renderURL var="viewEventVersionUrl">
+						<portlet:param name="action" value="ViewEvent"/>
+						<calendar:evalParam name="eventId" value="${eventId}"/>
+						<calendar:evalParam name="versionLanguageId" value="${currentLanguageId}"/>
+					</portlet:renderURL>
+
+					<c:choose>
+						<c:when test="${versionLanguageId == currentLanguageId}">
+							<c:set var="cssClass" value="activeTab"/>
+						</c:when>
+						<c:otherwise>
+							<c:set var="cssClass" value=""/>
+						</c:otherwise>
+					</c:choose>
+					<li class="<c:out value="${cssClass}"/>">
+						<a href="<c:out value="${viewEventVersionUrl}"/>"><ww:property value="top.language.name"/></a>
+					</li>
+				</ww:iterator>
+			</ul>
 		</ww:if>
-		
+
 		<p>
 			<calendar:textValue label="labels.internal.event.name" value="eventVersion.name" labelCssClass="label"/>
 		</p>

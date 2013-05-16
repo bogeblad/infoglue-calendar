@@ -123,21 +123,28 @@ public class ViewEventAction extends CalendarAbstractAction
 	            this.eventId = new Long(requestEventId);
 	
 	        this.availableLanguages = LanguageController.getController().getLanguageList(session);
-            if(this.versionLanguageId == null && this.availableLanguages.size() > 0)
-            {
-            	this.versionLanguageId = ((Language)this.availableLanguages.get(0)).getId();
-            }
+//            if(this.versionLanguageId == null && this.availableLanguages.size() > 0)
+//            {
+//            	this.versionLanguageId = ((Language)this.availableLanguages.get(0)).getId();
+//            }
             
 	        if(this.eventId != null)
 	        {
 	            this.event = EventController.getController().getEvent(eventId, session);
-	            Iterator eventVersionsIterator = this.event.getVersions().iterator();
+	            @SuppressWarnings("unchecked")
+	            Iterator<EventVersion> eventVersionsIterator = this.event.getVersions().iterator();
 	            while(eventVersionsIterator.hasNext())
 	            {
 	            	EventVersion currentEventVersion = (EventVersion)eventVersionsIterator.next();
-	            	if(currentEventVersion.getVersionLanguageId().equals(versionLanguageId))
-	            	{
+					// If no version language was provided in the request we select the first version's language as the current language
+					if(versionLanguageId == null || currentEventVersion.getVersionLanguageId().equals(versionLanguageId))
+					{
 	            		this.eventVersion = currentEventVersion;
+						if (log.isDebugEnabled() && versionLanguageId == null)
+						{
+							log.debug("No event language version was specified in request. Selecting first available. Which is: " + currentEventVersion.getLanguage().getName());
+						}
+						versionLanguageId = currentEventVersion.getLanguage().getId();
 	            		break;
 	            	}
 	            	else if(alternativeEventVersion == null) //Setting the alternative version if none set before and it's not the current.
@@ -183,8 +190,8 @@ public class ViewEventAction extends CalendarAbstractAction
         }
         catch(Exception e)
         {
-            log.error("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
-            setError("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas.", e);
+            log.error("Ett fel uppstod nar evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
+            setError("Ett fel uppstod nar evenemang med id " + this.eventId + " skulle visas.", e);
         }
         
         return Action.ERROR;
@@ -263,8 +270,8 @@ public class ViewEventAction extends CalendarAbstractAction
         }
         catch(Exception e)
         {
-            log.error("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
-            setError("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas.", e);
+            log.error("Ett fel uppstod nar evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
+            setError("Ett fel uppstod nar evenemang med id " + this.eventId + " skulle visas.", e);
         }
 
         return Action.ERROR;
@@ -315,8 +322,8 @@ public class ViewEventAction extends CalendarAbstractAction
         }
         catch(Exception e)
         {
-            log.error("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
-            setError("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas.", e);
+            log.error("Ett fel uppstod nï¿½r evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
+            setError("Ett fel uppstod nï¿½r evenemang med id " + this.eventId + " skulle visas.", e);
         }
         
         return Action.ERROR;
@@ -367,8 +374,8 @@ public class ViewEventAction extends CalendarAbstractAction
         }
         catch(Exception e)
         {
-            log.error("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
-            setError("Ett fel uppstod när evenemang med id " + this.eventId + " skulle visas.", e);
+            log.error("Ett fel uppstod nï¿½r evenemang med id " + this.eventId + " skulle visas:" + e.getMessage(), e);
+            setError("Ett fel uppstod nï¿½r evenemang med id " + this.eventId + " skulle visas.", e);
         }
         
         return Action.ERROR;

@@ -20,17 +20,22 @@
 </portlet:renderURL>
 
 <script type="text/javascript">
-	function submitDelete(okUrl, confirmMessage)
+	function submitDelete(okUrl, confirmMessageId)
 	{
 		//alert("okUrl:" + okUrl);
 		document.confirmForm.okUrl.value = okUrl;
-		document.confirmForm.confirmMessage.value = confirmMessage;
+		var elem = document.getElementById(confirmMessageId);
+		if (elem)
+		{
+			document.confirmForm.confirmMessage.value = elem.value;
+		}
 		document.confirmForm.submit();
 	}
 </script>
 <form name="confirmForm" action="<c:out value="${confirmUrl}"/>" method="post">
 	<input type="hidden" name="confirmTitle" value="Radera - bekräfta"/>
 	<input type="hidden" name="confirmMessage" value="Fixa detta"/>
+	<input type="hidden" name="encoded" value="false"/>
 	<input type="hidden" name="okUrl" value=""/>
 	<input type="hidden" name="cancelUrl" value="<c:out value="${viewListUrl}"/>"/>	
 </form>
@@ -107,8 +112,10 @@
 	   		<p style="white-space: nowrap;"><ww:property value="this.formatDate(startDateTime.time, 'yyyy-MM-dd')"/></p>
 	   	</div>
 	   	<div class="columnEnd">
-	   		<a href="javascript:submitDelete('<c:out value="${deleteUrl}"/>', 'Är du säker på att du vill radera &quot;<ww:property value="#eventVersion.name"/>&quot;');" title="Radera '<ww:property value="#eventVersion.name"/>'" class="delete"></a>
-	   	   	<a href="<c:out value="${eventUrl}"/>" title="Redigera '<ww:property value="#eventVersion.name"/>'" class="edit"></a>
+	   		<ww:set name="confirmMessageId" value="'confirmMessage_' + #rowstatus.index"/>
+			<input type="hidden" id="<ww:property value="#confirmMessageId"/>" name="<ww:property value="#confirmMessageId"/>" value="Är du säker på att du vill radera '<ww:property value="this.htmlEncodeValue(#eventVersion.name)"/>'" />
+	   		<a href="javascript:submitDelete('<c:out value="${deleteUrl}"/>', '<ww:property value="#confirmMessageId"/>');" title="Radera '<ww:property value="this.htmlEncodeValue(#eventVersion.name)"/>'" class="delete"></a>
+	   	   	<a href="<c:out value="${eventUrl}"/>" title="Redigera '<ww:property value="this.htmlEncodeValue(#eventVersion.name)"/>'" class="edit"></a>
 	   	</div>
 	   	<div class="clear"></div>
 	</div>

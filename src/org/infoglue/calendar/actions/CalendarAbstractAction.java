@@ -24,6 +24,7 @@
 package org.infoglue.calendar.actions;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.security.Principal;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -48,6 +49,9 @@ import java.util.TreeSet;
 import javax.portlet.RenderRequest;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
@@ -1492,6 +1496,11 @@ public class CalendarAbstractAction extends ActionSupport
 
     public String getAjaxServiceUrl(){
     	 return (String)ServletActionContext.getRequest().getAttribute("ajaxServiceUrl");
+    }
+
+	public String htmlEncodeValue(String value)
+	{
+		return StringEscapeUtils.escapeHtml(value);
     }
 }
 
