@@ -28,6 +28,7 @@ import java.util.Map;
 
 import javax.servlet.jsp.JspException;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -143,12 +144,12 @@ public class TextFieldTag extends AbstractCalendarTag
         if(this.label != null)
 	    {
 	    	sb.append("<label for=\"" + name + "\">" + this.label + "</label>" + (getMandatory() ? "<span class=\"" + requiredLabelClass + "\">" + requiredText + "</span>" : "") + " " + errorMessage + "<br/>\n");
-	    	sb.append("<input type=\"textfield\" id=\"" + name + "\" name=\"" + name + "\" value=\"" + ((value == null) ? "" : value) + "\" class=\"" + cssClass + "\"><br/>\n");
+	    	sb.append("<input type=\"textfield\" id=\"" + name + "\" name=\"" + name + "\" value=\"" + ((value == null) ? "" : new StringEscapeUtils().escapeHtml(value)) + "\" class=\"" + cssClass + "\"><br/>\n");
 	    }
 	    else
 	    {
 	    	sb.append("<label for=\"" + name + "\">" + this.name + "</label>" + (getMandatory() ? "<span class=\"" + requiredLabelClass + "\">requiredText</span>" : "") + " " + errorMessage + "<br/>\n");
-	    	sb.append("<input type=\"textfield\" id=\"" + name + "\" name=\"" + name + "\" value=\"" + ((value == null) ? "" : value) + "\" class=\"" + cssClass + "\"><br/>\n");
+	    	sb.append("<input type=\"textfield\" id=\"" + name + "\" name=\"" + name + "\" value=\"" + ((value == null) ? "" : new StringEscapeUtils().escapeHtml(value)) + "\" class=\"" + cssClass + "\"><br/>\n");
 	    }
         
         if(!skipRowDiv)

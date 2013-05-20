@@ -16,7 +16,7 @@ org.infoglue.calendar.entities.Language, java.util.List, java.util.Set, java.uti
 <ww:set name="eventList" value="events"/>
 <ww:set name="daysEventHash" value="this.getDaysEventHash('#eventList', true)" scope="page"/>
 <ww:if test="#attr.eventDetailUrl.indexOf('?') > -1">
-	<c:set var="delim" value="&"/>
+	<c:set var="delim" value="&amp;"/>
 </ww:if>
 <ww:else>
 	<c:set var="delim" value="?"/>
@@ -102,10 +102,10 @@ Map daysEventHash = (Map)pageContext.getAttribute("daysEventHash");
 <table class="GUCalendarCarouselGraphicalTable" cellspacing="0" border="0" cellpadding="0">
 	<% 
 	Locale locale = (Locale)pageContext.getAttribute("locale");
-	GregorianCalendar calendar = new GregorianCalendar(yy, mm, 1); 
+	GregorianCalendar calendar = new GregorianCalendar(yy, mm, 1);
 	calendar.setFirstDayOfWeek(Calendar.MONDAY);
 	Calendar weekDaysCalendar = Calendar.getInstance();
-	weekDaysCalendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);	
+	weekDaysCalendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
 	/* Kollar om länk till tidigare månad ska ritas ut */
 	Calendar monthDisplayed = Calendar.getInstance();
 	monthDisplayed.set(Calendar.MONTH, Integer.parseInt(pageContext.getAttribute("calendarMonthPreviousDateTimeString").toString().substring(5)));
@@ -120,7 +120,7 @@ Map daysEventHash = (Map)pageContext.getAttribute("daysEventHash");
 		<c:set var="delimGraphic" value="?"/>
 	</ww:else>
 	<tr>
-		<td class ="GUCalendarCarouselGraphicalTableHead">		
+		<td class ="GUCalendarCarouselGraphicalTableHead">
 			<c:if test="${printPreviousMonthLink}">
 				<%-- &lt;&lt; --%>
 				<a id="prevMonth" href="<ww:property value="#attr.baseUrlCalendarCarousel"/><c:out value="${delimGraphic}"/>calendarMonth=<%= pageContext.getAttribute("calendarMonthPreviousDateTimeString").toString() %>">&laquo;</a>
@@ -164,33 +164,33 @@ Map daysEventHash = (Map)pageContext.getAttribute("daysEventHash");
 	}
 	StringBuffer rows = new StringBuffer("");
 	
-    leadGap = calendar.get(Calendar.DAY_OF_WEEK)-2;
-    if(leadGap == -1)
-    	leadGap = 6;
- 	
-    int daysInMonth = dom[mm];
-    if (calendar.isLeapYear(calendar.get(Calendar.YEAR)) && mm == 1)
-      	++daysInMonth;
- 
-    rows.append("<tr>");
-	 
-    // Blank out the labels before 1st day of month
-    for (int i = 0; i < leadGap; i++) {
-	    rows.append("<td> </td>");
-    }
- 
-    // Fill in numbers for the day of month.
-    int endGap = 7;
-    String textArrayString = "";
+	leadGap = calendar.get(Calendar.DAY_OF_WEEK)-2;
+	if(leadGap == -1)
+		leadGap = 6;
 
-    for (int i = 1; i <= daysInMonth; i++) {
-    	String dateTimeString = vf.formatDate(calendar.getTime(), "yyyy-MM-") + (i<10 ? "0" : "") + i;
-    	pageContext.setAttribute("currentDateTimeString", dateTimeString);
-    	String selectedDate = (String)pageContext.getAttribute("selectedDate");	 	
-	    rows.append("<td" + (dateTimeString.equals(nowDateTimeString) ? " class=\"today\"" : "") + (dateTimeString.equals(selectedDate) ? " class=\"current\"" : "") + ">");
-      	
-      	if(daysEventHash.containsKey("day_" + i)){
-      		List<Event> todaysEvents = (List<Event>)daysEventHash.get("day_" + i);
+	int daysInMonth = dom[mm];
+	if (calendar.isLeapYear(calendar.get(Calendar.YEAR)) && mm == 1)
+		++daysInMonth;
+
+	rows.append("<tr>");
+
+	// Blank out the labels before 1st day of month
+	for (int i = 0; i < leadGap; i++) {
+		rows.append("<td> </td>");
+	}
+
+	// Fill in numbers for the day of month.
+	int endGap = 7;
+	String textArrayString = "";
+
+	for (int i = 1; i <= daysInMonth; i++) {
+		String dateTimeString = vf.formatDate(calendar.getTime(), "yyyy-MM-") + (i<10 ? "0" : "") + i;
+		pageContext.setAttribute("currentDateTimeString", dateTimeString);
+		String selectedDate = (String)pageContext.getAttribute("selectedDate");	 	
+		rows.append("<td" + (dateTimeString.equals(nowDateTimeString) ? " class=\"today\"" : "") + (dateTimeString.equals(selectedDate) ? " class=\"current\"" : "") + ">");
+
+		if(daysEventHash.containsKey("day_" + i)){
+			List<Event> todaysEvents = (List<Event>)daysEventHash.get("day_" + i);
 			String title = "";
 			String startDate = "";
 			String endDate = "";
@@ -200,74 +200,73 @@ Map daysEventHash = (Map)pageContext.getAttribute("daysEventHash");
 			String shortDescription = "";
 			String headerDate ="";
 			String cross_close = "";
-      		for(int j = 0; j < todaysEvents.size(); j++){
-      			Event currentEvent = todaysEvents.get(j);
+			for(int j = 0; j < todaysEvents.size(); j++){
+				Event currentEvent = todaysEvents.get(j);
 				pageContext.setAttribute("currentEvent", currentEvent);
-				EventVersion currentEventVersion = calendarAbstractAction.getEventVersion(currentEvent);	
-				
+				EventVersion currentEventVersion = calendarAbstractAction.getEventVersion(currentEvent);
+
 				Set categoryAttributes = currentEvent.getOwningCalendar().getEventType().getCategoryAttributes();
 				Iterator it = categoryAttributes.iterator();
-                while (it.hasNext())
-                {
-                	EventTypeCategoryAttribute attribute = (EventTypeCategoryAttribute)it.next();
-                	if (attribute.getName().equals("Evenemangstyp") || attribute.getName().equals("Eventtyp"))
-                	{
-                		 List<Category> selectedCategories = calendarAbstractAction.getEventCategories(currentEvent, attribute);
-                		 Iterator<Category> itSelectedCategories = selectedCategories.iterator();
-                		 String categoryDelim = "";
-                		 while (itSelectedCategories.hasNext())
-                		 {
-                			 Category selectedCategory = itSelectedCategories.next();
-                			 eventTypes += categoryDelim + selectedCategory.getLocalizedName(calendarAbstractAction.getLanguageCode(), "sv");
-                			 categoryDelim = ", ";
-                		 }
-                	}
-                } 	
-                startDate = calendarAbstractAction.formatDate(currentEvent.getStartDateTime().getTime(), "HH:mm");
-                if(startDate.equals("12:34")){
-                	startDate = "00:00";
-                }
-                endDate = calendarAbstractAction.formatDate(currentEvent.getEndDateTime().getTime(), "HH:mm");
-	           	date = "<span class=\"smallfont\">"+ beginsLabel + " " + clockLabel + " " + startDate + "</span><span class=\"smallfont\">" + endsLabel + " " + clockLabel + " " + endDate + "</span>";
-	    		title = "<a href=\"" + eventDetailUrl + delim + "amp;eventId=" + currentEvent.getId() + "\">"+ StringEscapeUtils.escapeJavaScript(currentEventVersion.getTitle()) +"</a>";
-	    		eventTypes = "<span class=\"smallfont\">" + StringEscapeUtils.escapeJavaScript(eventTypes) + "</span>";
-	    		todayEvents += "<li class=\"eventBox\">" + eventTypes + title + date + "</li>";// + shortDescription;
-	    		eventTypes = "";
-      		}
-      		headerDate =  "<h3 class=\"infoboxHeaderDate\">" + i + " " + vf.formatDate(calendarMonthCalendar.getTime(), locale, "MMMM") + "</h3>";
-      		cross_close = "<div class=\"cross_close\"><img src=\"" + cross_close_Img +"\""+ 
-      				" onmouseout=\"this.src=\\\'" + cross_close_Img + "\\\'\""+
-      				" onmouseup=\"this.src=\\\'" + cross_close_Img + "\\\'\""+
-      				" onmousedown=\"this.src=\\\'" + cross_close_Img_hover + "\\\'\""+
-      				" onmouseover=\"this.src=\\\'" + cross_close_Img_hover + "\\\'\""+
-      			 	" alt=\"\"/></div>";
-      		todayEvents = "textArray[" + i + "] = '"+ cross_close + headerDate + "<ul>" + todayEvents + "</ul>" + "';";
-		    rows.append("<a data-id=\"" + i + "\" href=\"\" class=\"thelink\"><span class=\"dateNumber\">" + i + "</span></a>");
-		    textArrayString += todayEvents ;
-	  	}
-	  	else{
-	  	    rows.append("<span class=\"dateNumber\">" + i + "</span>");
+				while (it.hasNext())
+				{
+					EventTypeCategoryAttribute attribute = (EventTypeCategoryAttribute)it.next();
+					if (attribute.getName().equals("Evenemangstyp") || attribute.getName().equals("Eventtyp"))
+					{
+						List<Category> selectedCategories = calendarAbstractAction.getEventCategories(currentEvent, attribute);
+						Iterator<Category> itSelectedCategories = selectedCategories.iterator();
+						String categoryDelim = "";
+						while (itSelectedCategories.hasNext())
+						{
+							Category selectedCategory = itSelectedCategories.next();
+							eventTypes += categoryDelim + selectedCategory.getLocalizedName(calendarAbstractAction.getLanguageCode(), "sv");
+							categoryDelim = ", ";
+						}
+					}
+				}
+				startDate = calendarAbstractAction.formatDate(currentEvent.getStartDateTime().getTime(), "HH:mm");
+				if(startDate.equals("12:34")){
+					startDate = "00:00";
+				}
+				endDate = calendarAbstractAction.formatDate(currentEvent.getEndDateTime().getTime(), "HH:mm");
+				date = "<span class=\"smallfont\">"+ beginsLabel + " " + clockLabel + " " + startDate + "</span><span class=\"smallfont\">" + endsLabel + " " + clockLabel + " " + endDate + "</span>";
+				title = "<a href=\"" + eventDetailUrl + delim + "eventId=" + currentEvent.getId() + "\">"+ StringEscapeUtils.escapeJavaScript(currentEventVersion.getTitle()) +"</a>";
+				eventTypes = "<span class=\"smallfont\">" + StringEscapeUtils.escapeJavaScript(eventTypes) + "</span>";
+				todayEvents += "<li class=\"eventBox\">" + eventTypes + title + date + "</li>";// + shortDescription;
+				eventTypes = "";
+			}
+			headerDate =  "<h3 class=\"infoboxHeaderDate\">" + i + " " + vf.formatDate(calendarMonthCalendar.getTime(), locale, "MMMM") + "</h3>";
+			cross_close = "<div class=\"cross_close\"><img src=\"" + cross_close_Img +"\""+ 
+					" onmouseout=\"this.src=\\\'" + cross_close_Img + "\\\'\""+
+					" onmouseup=\"this.src=\\\'" + cross_close_Img + "\\\'\""+
+					" onmousedown=\"this.src=\\\'" + cross_close_Img_hover + "\\\'\""+
+					" onmouseover=\"this.src=\\\'" + cross_close_Img_hover + "\\\'\""+
+				 	" alt=\"\"/></div>";
+			todayEvents = "textArray[" + i + "] = '"+ cross_close + headerDate + "<ul>" + todayEvents + "</ul>" + "';";
+			rows.append("<a data-id=\"" + i + "\" href=\"\" class=\"thelink\"><span class=\"dateNumber\">" + i + "</span></a>");
+			textArrayString += todayEvents ;
 		}
-  	    rows.append("</td>");
- 		endGap--;
+		else{
+			rows.append("<span class=\"dateNumber\">" + i + "</span>");
+		}
+		rows.append("</td>");
+		endGap--;
 
-      	if ((leadGap + i) % 7 == 0) {    // wrap if end of line.
+		if ((leadGap + i) % 7 == 0) {	// wrap if end of line.
+			rows.append("</tr>");
+			rows.append("<tr>");
+			endGap = 7;
+		}
+	}
 
-	  	    rows.append("</tr>");
-        	rows.append("<tr>");
-        	endGap = 7;
-      	}
-    }
-    
-    if(endGap < 7)
-    {
-    	for(int i=0; i<endGap; i++)
-    	{
-    		rows.append("<td> </td>");
-    	}
-   	}
-   	rows.append("</tr>");	    		
-  		out.print(rows.toString().replaceAll("<tr></tr>", ""));
+	if(endGap < 7)
+	{
+		for(int i=0; i<endGap; i++)
+		{
+			rows.append("<td> </td>");
+		}
+	}
+	rows.append("</tr>");	    		
+	out.print(rows.toString().replaceAll("<tr></tr>", ""));
 	%>
 </table>
 <div id="tipbox"></div>
@@ -315,5 +314,3 @@ Map daysEventHash = (Map)pageContext.getAttribute("daysEventHash");
 </script>
 <!-- /eri-no-follow -->
 <!--/eri-no-index-->
- 
- 
