@@ -45,6 +45,7 @@ import org.infoglue.calendar.entities.Location;
 import org.infoglue.calendar.entities.Participant;
 import org.infoglue.calendar.entities.Role;
 import org.infoglue.calendar.entities.Subscriber;
+import org.infoglue.calendar.controllers.CalendarSettingsController;
 import org.infoglue.calendar.util.EventComparator;
 import org.infoglue.common.security.beans.InfoGluePrincipalBean;
 import org.infoglue.common.security.beans.InfoGlueRoleBean;
@@ -55,7 +56,7 @@ import org.infoglue.common.util.VelocityTemplateProcessor;
 import org.infoglue.common.util.WebServiceHelper;
 import org.infoglue.common.util.io.FileHelper;
 import org.infoglue.common.util.mail.MailServiceFactory;
-
+import org.infoglue.common.settings.entities.Property;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -854,8 +855,18 @@ public class EventController extends BasicController
 
 		new RemoteCacheUpdater().updateRemoteCaches(event.getCalendars());
 		//new RemoteCacheUpdater().updateRemoteCaches(event.getOwningCalendar().getId());
+
+                Property propMailEnabled = null;
+
+                String propMailEnabledKey = "CAL" + "_" + id + "_mailEnabled";                        
+
+                        propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(
+                    propMailEnabledKey,
+                    propMailEnabledKey,
+                    session
+                    );
 		
-        if(useGlobalEventNotification())
+        if(useGlobalEventNotification() && !propMailEnabled.getValue().equals("0") && !propMailEnabled.getValue().equals(""))
         {
             try
             {
@@ -2038,6 +2049,8 @@ public class EventController extends BasicController
 				systemEmailSender = "infoglueCalendar@" + PropertyHelper.getProperty("mail.smtp.host");
 
 			log.info("Sending mail to:" + systemEmailSender + " and " + subscriberEmails);
+
+
 			MailServiceFactory.getService().send(systemEmailSender, subscriberEmails, null, "InfoGlue Calendar - new event published", email, contentType, "UTF-8", null);
 	    
 			String subscriberString = "";

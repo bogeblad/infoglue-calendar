@@ -6,6 +6,7 @@
 <%@ include file="functionMenu.jsp" %>
 
 <ww:set name="calendarId" value="calendar.id" scope="page"/>
+<ww:set name="mailEnabled" value="this.getMailEnabled()" scope="page"/>
 
 <portlet:renderURL var="viewSubscriptionsUrl">
 	<portlet:param name="action" value="ViewSubscriptionList"/>
@@ -46,8 +47,15 @@
 	    <calendar:selectField label="labels.internal.calendar.groups" name="groups" multiple="true" value="infoglueGroups" selectedValueSet="#owningGroups" cssClass="listBox"/>
 	    
 	    <calendar:selectField label="labels.internal.calendar.eventType" name="'eventTypeId'" multiple="false" value="eventTypes" selectedValue="calendar.eventType.id" cssClass="listBox"/>
-
+            
 	    <calendar:selectField label="labels.internal.calendar.eventType" name="'systemLanguageId'" multiple="false" value="languages" selectedValue="calendar.languages.id" cssClass="listBox"/>
+
+            <div class='fieldrow'>
+                <label for='mailEnabled'>
+                    Mail
+                    <input type='checkbox' name='mailEnabled' id='mailEnabled' <c:if test="${mailEnabled eq '1'}">checked</c:if> >
+                </label>
+            </div>
 
 		<div style="height:10px"></div>
 		<input type="submit" value="<ww:property value="this.getLabel('labels.internal.calendar.updateButton')"/>" class="button">
