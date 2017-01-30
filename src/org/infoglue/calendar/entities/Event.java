@@ -25,10 +25,14 @@ package org.infoglue.calendar.entities;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 import org.infoglue.calendar.util.validators.BaseValidator;
 import org.infoglue.common.contenttypeeditor.entities.ContentTypeDefinition;
 import org.infoglue.common.util.ConstraintExceptionBuffer;
+
+import org.infoglue.calendar.entities.Category;
 
 /**
  * This class represents an event. An event is something that takes place between a startdate and an enddate
@@ -461,6 +465,22 @@ public class Event implements BaseEntity
     public Set getEventCategories()
     {
         return eventCategories;
+    }
+
+    public ArrayList<Category> getEventCategoriesFiltered(String filterKey)
+    {
+        Set categories = this.getEventCategories();
+        ArrayList<Category> filteredCategories = new ArrayList<Category>();
+        
+        Iterator i = categories.iterator();
+        while(i.hasNext())
+        {
+            EventCategory eventCategory = (EventCategory)i.next();
+            if(eventCategory.getEventTypeCategoryAttribute().getInternalName().equals(filterKey))
+                filteredCategories.add(eventCategory.getCategory());
+        }
+
+        return filteredCategories;
     }
     
     public void setEventCategories(Set eventCategories)

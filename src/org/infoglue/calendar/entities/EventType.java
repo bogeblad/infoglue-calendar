@@ -35,7 +35,7 @@ import org.infoglue.common.contenttypeeditor.entities.ContentTypeDefinition;
  */
 
 public class EventType implements BaseEntity, ContentTypeDefinition
-{
+{       
 	public static final Integer EVENT_DEFINITION = new Integer(0);
 	public static final Integer ENTRY_DEFINITION = new Integer(1);
 

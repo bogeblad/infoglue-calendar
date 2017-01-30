@@ -1,5 +1,8 @@
 *.class
-
+*.*.swh
+*.*.swj
+*.*.swk
+*.*.swi
 # Package Files #
 *.jar
 *.war
@@ -9,3 +12,12 @@ war/
 build/
 bin/
 .externalToolBuilders/
+*.swp
+*.swl
+*.swn
+*.swo
+*.swm
+${deploy.dir.working}
+"\3729\346\347\340"
+._.DS_Store
+.DS_Store

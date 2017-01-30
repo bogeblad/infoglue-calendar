@@ -69,6 +69,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.text.SimpleDateFormat;
+
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
@@ -1963,9 +1965,13 @@ public class EventController extends BasicController
 	        publishEventUrl = publishEventUrl.replaceAll("j_password", "fold2");
 	        
 		    Map parameters = new HashMap();
+
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    String startDate = formatter.format(event.getStartDateTime().getTime());
 		    
 		    parameters.put("principal", infoGluePrincipal);
 		    parameters.put("event", event);
+                    parameters.put("startDate", startDate);
 		    parameters.put("eventVersion", eventVersion);
 		    parameters.put("publishEventUrl", publishEventUrl.replaceAll("\\{eventId\\}", event.getId().toString()));
 		    

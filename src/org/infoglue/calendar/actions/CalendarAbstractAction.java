@@ -788,6 +788,16 @@ public class CalendarAbstractAction extends ActionSupport
         return ResourceController.getController().getResourceUrl(event, assetKey, getSession());
     }
 
+    public String getResourceUrl(EventTiny event, String assetKey) throws Exception
+    {
+        if (event == null)
+        {
+        log.debug("Event was null. Cannot return resource url.");
+        return "";
+        }
+        return ResourceController.getController().getResourceUrl(event.getId(), assetKey, getSession());
+    }
+
     public String getResourceThumbnailUrl(Long resourceId, int width, int height) throws Exception
     {
     	return ResourceController.getController().getResourceThumbnailUrl(resourceId, width, height, getSession());

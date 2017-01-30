@@ -42,6 +42,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.infoglue.calendar.entities.Calendar;
 import org.infoglue.calendar.entities.Event;
+import org.infoglue.calendar.entities.EventTiny;
 import org.infoglue.calendar.entities.Resource;
 import org.infoglue.calendar.util.graphics.ThumbnailGenerator;
 import org.infoglue.common.util.PropertyHelper;
@@ -78,6 +79,67 @@ public class ResourceController extends BasicController
 		resource = createResource(event, assetKey, contentType, fileName, file, session);
 		
         return resource;
+    }
+
+    private void writeResourceToDisc(Resource resource, String digitalAssetPath, File file) {
+        String filePath = digitalAssetPath + file.getName();
+        try
+        {
+        FileOutputStream fos = new FileOutputStream(filePath);
+        Blob blob = resource.getResource();
+        byte[] bytes = blob.getBytes(1, (int) blob.length());
+        fos.write(bytes);
+        fos.flush();
+        fos.close();
+        log.debug("Created file on disc <" + file.getAbsolutePath() + ">");
+        }
+        catch (FileNotFoundException ex)
+        {
+        log.warn("File exists or could not be created. File path <" + filePath + "> Resource.id: <" + resource.getId() +  "> Message: " + ex.getMessage());
+        }
+        catch (IOException ex)
+        {
+        log.warn("IO exception when writing resource to disc. Resource.id: <" + resource.getId() +  "> Message: " + ex.getMessage());
+        }
+        catch (SQLException ex)
+        {
+        log.warn("Database error when writing resource to disc. Resource.id: <" + resource.getId() +  "> Message: " + ex.getMessage());
+        }
+        }
+        private Resource getResource(Long eventId, String assetKey, Session session) {
+        try
+        {
+        Query query = session.createQuery("FROM Resource resource WHERE assetKey = :asset_key AND resource.event.id = :event_id");
+        query.setParameter("asset_key", assetKey);
+        query.setParameter("event_id", eventId);
+        return (Resource)query.uniqueResult();
+        }
+        catch (HibernateException hex)
+        {
+        log.error("Error when fetching Resource from the database. Message: " + hex.getMessage());
+        return null;
+        }
+    }
+
+    private String constructResourceUrl(Resource resource)
+    {
+        String digitalAssetPath = PropertyHelper.getProperty("digitalAssetPath");
+        String fileName = resource.getId() + "_" + resource.getAssetKey() + "_" + resource.getFileName();
+        String filePath = digitalAssetPath + fileName;
+
+        File file = new File(filePath);
+        if (!file.exists())
+        {
+        log.debug("Resource does not exist on disc. Lets create it. Resouce.id <" + resource.getId() + ">");
+        writeResourceToDisc(resource, digitalAssetPath, file);
+        }
+        else
+        {
+        log.debug("Resource file already exists in disc. <" + file.getAbsolutePath() + ">");
+        }
+
+        String urlBase = PropertyHelper.getProperty("urlBase");
+        return urlBase + "digitalAssets/" + fileName;
     }
 
     
@@ -244,6 +306,29 @@ public class ResourceController extends BasicController
     	return getResourceUrlString(resource, null, null);
     }
 
+    /**
+    * Fetches the URL for the given asset on the given event. If the asset is not found or if an error occurs an
+    * empty string is returned.
+    * 
+    * @param eventId The event which resource to get.
+    * @param assetKey The asset key of the resource to get.
+    * @param session A Hibernate session that will be used to fetch the resource.
+    * @return A URL to the resource or an empty string if no asset URL could be fetched.
+    */
+    public String getResourceUrl(Long eventId, String assetKey, Session session) {
+        Resource result = getResource(eventId, assetKey, session);
+        if (result == null)
+        {
+        log.debug("Found no resource for <" + eventId + "> <" + assetKey + ">");
+        return "";
+        }
+        else
+        {
+        log.debug("Found resource for <" + eventId + "> <" + assetKey + ">. Resource.id: <" + result.getId() + ">");
+        return constructResourceUrl(result);
+        }
+    }
+
     private String getResourceUrlString(Resource resource, Integer width, Integer height)
     {
     	String fileName = getResourceFileName(resource, width, height);
@@ -333,8 +418,9 @@ public class ResourceController extends BasicController
     @SuppressWarnings("unchecked")
 	private Resource getResourceFromEvent(Event event, String assetKey)
     {
-    	if(event == null)
+    	if(event == null) {
     		return null;
+        }
     	
     	for (Resource resource : (Set<Resource>)event.getResources())
     	{
@@ -355,10 +441,10 @@ public class ResourceController extends BasicController
      * This method returns a Resource based on it's owning content and it's asset key.
      * @return Resource
      */
-    public String getResourceUrl(Event event, String assetKey, Session session)
+    public String getResourceUrl(Event event, String assetKey, Session session) throws Exception
     {
     	String url = null;
-
+        
     	try
     	{
     		Resource resource = getResourceFromEvent(event, assetKey);
