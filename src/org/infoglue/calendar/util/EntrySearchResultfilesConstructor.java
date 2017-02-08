@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.infoglue.calendar.actions.CalendarAbstractAction;
 import org.infoglue.common.util.JFreeReportHelper;
 import org.infoglue.common.util.PropertyHelper;
+import org.infoglue.calendar.entities.Entry;
 
 import com.opensymphony.webwork.ServletActionContext;
 
@@ -24,10 +25,12 @@ public class EntrySearchResultfilesConstructor
 
 	private static Log log = LogFactory.getLog(EntrySearchResultfilesConstructor.class);
 
+	private static ResultFilesCleaner cleaner;
+
 	private Map parameters = new HashMap();
-	private Set entries;
-	private Map searchResultFiles;
-	private Map searchResultFilePaths;
+	private Set<Entry> entries;
+	private Map<String, String> searchResultFiles;
+	private Map<String, String> searchResultFilePaths;
 	private String tempFilePath;
 	private String scheme;
 	private String serverName;
@@ -36,12 +39,33 @@ public class EntrySearchResultfilesConstructor
 	private List resultValues;
 	private CalendarAbstractAction action;
 	private String entryTypeId;
-	
-	public EntrySearchResultfilesConstructor(Map parameters, Set entries, String tempFilePath, String scheme, String serverName, int port, List resultValues, CalendarAbstractAction action, String entryTypeId) 
+
+	private static synchronized void cleanResults()
+	{
+		if (cleaner == null)
+		{
+			cleaner = new ResultFilesCleaner();
+			new Thread(cleaner).start();
+		}
+		else if (!cleaner.isRunning)
+		{
+			log.warn("Clean result files thread seems to have died. Starting a new one...");
+			cleaner = new ResultFilesCleaner();
+			new Thread(cleaner).start();
+		}
+	}
+
+	private static String getTempFilePath()
+	{
+		String digitalAssetPath = PropertyHelper.getProperty("digitalAssetPath");
+		return digitalAssetPath;
+	}
+
+	public EntrySearchResultfilesConstructor(Map parameters, Set<Entry> entries, String tempFilePath, String scheme, String serverName, int port, List resultValues, CalendarAbstractAction action, String entryTypeId) 
 	{
 		this.parameters = parameters;
 		this.entries = entries;
-		this.tempFilePath = tempFilePath;
+		//this.tempFilePath = tempFilePath;
 		this.scheme = scheme;
 		this.serverName = serverName;
 		this.port = port;
@@ -53,11 +77,10 @@ public class EntrySearchResultfilesConstructor
 
 	private void createResults()
 	{
-		searchResultFiles = new LinkedHashMap();
-		searchResultFilePaths = new LinkedHashMap();
-		HttpServletRequest request = ServletActionContext.getRequest();
+		searchResultFiles = new LinkedHashMap<String, String>();
+		searchResultFilePaths = new LinkedHashMap<String, String>();
 		String exportEntryResultsFolder = PropertyHelper.getProperty("exportEntryResultsFolder");
-		fileFolderLocation = tempFilePath + File.separator + exportEntryResultsFolder + File.separator;
+		fileFolderLocation = getTempFilePath() + File.separator + exportEntryResultsFolder + File.separator;
 		String httpFolderLocation = scheme + "://" + serverName + ":" + port + "/infoglueCalendar/digitalAssets/" + exportEntryResultsFolder + "/";
 		File f = new File(fileFolderLocation);
 		if (!f.exists())
@@ -66,7 +89,7 @@ public class EntrySearchResultfilesConstructor
 		}
 
 		// start the thread cleaning the directory of old files
-		new Thread(new ResultFilesCleaner()).start();
+		cleanResults();
 
 		String exportEntryResultsTypes = PropertyHelper.getProperty("exportEntryResultsTypes");
 		if (exportEntryResultsTypes != null)
@@ -163,18 +186,18 @@ public class EntrySearchResultfilesConstructor
 		}
 	}
 
-	public Map getResults() {
+	public Map<String, String> getResults() {
 		return searchResultFiles;
 	}
 
-	public Map getFileResults() {
+	public Map<String, String> getFileResults() {
 		return searchResultFilePaths;
 	}
 
-	class ResultFilesCleaner implements Runnable {
+	static class ResultFilesCleaner implements Runnable {
 
 		long waitForTurn;
-
+		boolean isRunning = false;
 		long maxAge;
 
 		public ResultFilesCleaner() {
@@ -186,36 +209,55 @@ public class EntrySearchResultfilesConstructor
 			log.debug( "frequency: " + waitForTurn + ", maxAge: " + maxAge );
 		}
 
+		public boolean isRunning()
+		{
+			return isRunning;
+		}
+
 		public void run() {
-			while( true ) {
-				try {
-					log.debug("Running cleanup for old result files.");
-					long maxAgeTime = System.currentTimeMillis() - maxAge;
-					Date d = new Date( maxAgeTime );
-					log.debug( "Delete older than: " + d.toString() );
-					File folder = new File(fileFolderLocation);
-					File[] fileNames = folder.listFiles();
-					log.debug( "Found: " + fileNames.length + " files." );
-					for (int i = 0; i < fileNames.length; i++) {
-						File file = fileNames[i];
-						log.debug( "File: " + file.getName() + ": " + file.isFile() + ", " + file.canRead() + ", " + file.canWrite() );
-						if( !file.isDirectory() ) {
-							log.debug( "LM: " + file.lastModified() + ", maxAge: " + maxAgeTime );
-							if (file.lastModified() < maxAgeTime ) {
-								log.info("Deleting file: " + file.getName());
-								file.delete();
+			try
+			{
+				isRunning = true;
+				while( true )
+				{
+					try
+					{
+						log.debug("Running cleanup for old result files.");
+						long maxAgeTime = System.currentTimeMillis() - maxAge;
+						Date d = new Date( maxAgeTime );
+						log.debug( "Delete older than: " + d.toString() );
+						File folder = new File(getTempFilePath());
+						File[] fileNames = folder.listFiles();
+						log.debug( "Found: " + fileNames.length + " files." );
+						for (int i = 0; i < fileNames.length; i++) {
+							File file = fileNames[i];
+							log.debug( "File: " + file.getName() + ": " + file.isFile() + ", " + file.canRead() + ", " + file.canWrite() );
+							if( !file.isDirectory() ) {
+								log.debug( "LM: " + file.lastModified() + ", maxAge: " + maxAgeTime );
+								if (file.lastModified() < maxAgeTime ) {
+									log.info("Deleting file: " + file.getName());
+									file.delete();
+								}
 							}
 						}
 					}
-				} catch (Exception e) {
-					log.warn("Failed deleting old result files.", e);
+					catch (Exception e)
+					{
+						log.warn("Failed deleting old result files.", e);
+					}
+					try
+					{
+						Thread.sleep(waitForTurn);
+					}
+					catch (Exception e)
+					{
+						log.warn("Sleep failed.", e);
+					}
 				}
-				try {
-					Thread.currentThread().sleep(waitForTurn);
-				} catch (Exception e) {
-					log.warn("Sleep failed.", e);
-				}
-
+			}
+			finally
+			{
+				isRunning = false;
 			}
 		}
 	}
