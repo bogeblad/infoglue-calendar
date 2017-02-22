@@ -265,27 +265,46 @@ public class GapchaTag extends AbstractTag
 		}
 	}
 
+	private static boolean disableCleanOldFiles()
+	{
+		String setting = PropertyHelper.getProperty("disableGapchaFileRemover");
+		logger.info("disableGapchaFileRemover: " + setting);
+		if (PropertyHelper.isUndefinedProperty(setting, null))
+		{
+			return false;
+		}
+		else
+		{
+			return "true".equals(setting);
+		}
+	}
+
 	public static void cleanOldFiles()
 	{
+		if (disableCleanOldFiles())
+		{
+			logger.debug("Clean old files is disabled.");
+			return;
+		}
 		int i = 0;
-        String filePath = PropertyHelper.getProperty("digitalAssetPath");
-        logger.info("Cleaning files...");
-        File folder = new File(filePath);
-        File[] files = folder.listFiles();
-        logger.info("files:" + files.length);
-        for(int j=0; j<files.length; j++)
-        {
-        	File file = files[j];
-            if(file.getName().startsWith("igcaptcha"))
-            {
-            	logger.info("file.getName():" + file.getName() + " - " + (System.currentTimeMillis() - file.lastModified()));
-                if(System.currentTimeMillis() - file.lastModified() > 60000)
-                {
-                	logger.info("Deleting:" + file.getName());
-                    file.delete();
-                }
-            }
-        }
+		String filePath = PropertyHelper.getProperty("digitalAssetPath");
+		logger.info("Cleaning files...");
+		File folder = new File(filePath);
+		File[] files = folder.listFiles();
+		logger.info("files:" + files.length);
+		for(int j=0; j<files.length; j++)
+		{
+			File file = files[j];
+			if(file.getName().startsWith("igcaptcha"))
+			{
+				logger.info("file.getName():" + file.getName() + " - " + (System.currentTimeMillis() - file.lastModified()));
+				if(System.currentTimeMillis() - file.lastModified() > 60000)
+				{
+					logger.info("Deleting:" + file.getName());
+					file.delete();
+				}
+			}
+		}
 	}
 
 	/**

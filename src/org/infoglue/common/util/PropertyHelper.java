@@ -174,6 +174,19 @@ public class PropertyHelper
 		}	
 		
 		return infoglueCacheInstanceUrls;
-	}		
+	}
+
+	/**
+	 * Determine if the given property is valid. The value is verified to have a non-empty string value
+	 * and that that it does not conform to the default placeholder syntax.
+	 *
+	 * @param property The property to verify. May be null or empty.
+	 * @param namePrefix A prefix used by the placeholder syntax. May be null.
+	 * @return true if the given property is determined to be an undefined value, false otherwise.
+	 */
+	public static boolean isUndefinedProperty(String property, String namePrefix)
+	{
+		return property == null || property.trim().equals("") ||  property.startsWith("@" + (namePrefix == null ? "" : namePrefix)) && property.endsWith("@");
+	}
 
 }
