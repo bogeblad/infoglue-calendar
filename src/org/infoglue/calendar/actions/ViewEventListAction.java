@@ -119,10 +119,12 @@ public class ViewEventListAction extends CalendarAbstractAction
         
         Session session = getSession(true);
     	        
-        this.events = EventController.getController().getEventList(calendarIds, categoryAttribute, categoryNamesArray, includedLanguages, null, null, null, session);
+        this.events = EventController.getController().getEventList(calendarIds, categoryAttribute, categoryNamesArray, includedLanguages, null, null, null, session, null);
         
         log.info("Registering usage at least:" + calendarId + " for siteNodeId:" + this.getSiteNodeId());
+
         RemoteCacheUpdater.setUsage(this.getSiteNodeId(), calendarIds);
+
         
         String presentationTemplate = getPresentationTemplate();
         log.info("presentationTemplate:" + presentationTemplate);
@@ -509,7 +511,18 @@ public class ViewEventListAction extends CalendarAbstractAction
         
         Session session = getSession(true);
     	        
-        this.events = EventController.getController().getTinyEventList(calendarIds, categoryAttribute, categoryNamesArray, includedLanguages, startCalendar, endCalendar, freeText, numberOfItems, session);
+        //INTERESTING
+        this.events = EventController.getController().getTinyEventList(
+                calendarIds,
+                categoryAttribute,
+                categoryNamesArray,
+                includedLanguages,
+                startCalendar,
+                endCalendar,
+                freeText,
+                numberOfItems,
+                session
+                );
         
         log.info("Registering usage at least:" + calendarId + " for siteNodeId:" + this.getSiteNodeId());
         RemoteCacheUpdater.setUsage(this.getSiteNodeId(), calendarIds);

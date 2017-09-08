@@ -14,7 +14,6 @@
 	<ww:set name="dateFormat" value="'yyyy-MM-dd'"/>
 	<ww:set name="timeFormat" value="'HH:mm'"/>
 </ww:else>
-
 <H1><ww:property value="this.getLabel('labels.public.calendar.calendarLabel')"/></H1>
 <!-- Calendar start -->
 <div class="calendar">   

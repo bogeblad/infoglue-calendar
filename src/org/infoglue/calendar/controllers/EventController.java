@@ -1265,6 +1265,7 @@ public class EventController extends BasicController
 	        String groupsSQL = getGroupsSQL(groups);
 	        log.info("groupsSQL:" + groupsSQL);
 	        String sql = "select c from Calendar c, Role cr, Group g where cr.calendar = c AND g.calendar = c " + (rolesSQL != null ? " AND cr.name IN " + rolesSQL : "") + (groupsSQL != null ? " AND g.name IN " + groupsSQL : "") + " order by c.id";
+                
 	        //String sql = "select distinct c from Calendar c, Role cr, Group g where cr.calendar = c AND g.calendar = c " + (rolesSQL != null ? " AND cr.name IN " + rolesSQL : "") + (groupsSQL != null ? " AND g.name IN " + groupsSQL : "") + " order by c.id";
 	        log.info("sql:" + sql);
 	        Query q = session.createQuery(sql);
@@ -1312,6 +1313,7 @@ public class EventController extends BasicController
 	        String groupsSQL = getGroupsSQL(groups);
 	        log.info("groupsSQL:" + groupsSQL);
 	        String sql = "select event from Event event, Calendar c, Role cr, Group g where event.owningCalendar = c AND cr.calendar = c AND g.calendar = c AND event.stateId = ? AND event.endDateTime >= ? " + (rolesSQL != null ? " AND cr.name IN " + rolesSQL : "") + (groupsSQL != null ? " AND g.name IN " + groupsSQL : "") + " order by event.startDateTime";
+                
 	        //String sql = "select distinct event from Event event, Calendar c, Role cr, Group g where event.owningCalendar = c AND cr.calendar = c AND g.calendar = c AND event.stateId = ? AND event.endDateTime >= ? " + (rolesSQL != null ? " AND cr.name IN " + rolesSQL : "") + (groupsSQL != null ? " AND g.name IN " + groupsSQL : "") + " order by event.startDateTime";
 	        log.info("sql:" + sql);
 	        Query q = session.createQuery(sql);
@@ -1359,8 +1361,7 @@ public class EventController extends BasicController
         
         return set;
     }
-
-
+    
     /**
      * Gets a list of all events available for a particular user which are in working mode.
      * @return List of Event
@@ -1502,9 +1503,9 @@ public class EventController extends BasicController
 		return list;
     }
 
-    public Set getEventList(String[] calendarIds, String categoryAttribute, String[] categoryNames, String includedLanguages, java.util.Calendar startCalendar, java.util.Calendar endCalendar, String freeText, Session session) throws Exception 
+    public Set getEventList(String[] calendarIds, String categoryAttribute, String[] categoryNames, String includedLanguages, java.util.Calendar startCalendar, java.util.Calendar endCalendar, String freeText, Session session, Integer limit) throws Exception 
     {
-    	return getEventList(calendarIds, categoryAttribute, categoryNames, includedLanguages, startCalendar, endCalendar, freeText, null, session);
+    	return getEventList(calendarIds, categoryAttribute, categoryNames, includedLanguages, startCalendar, endCalendar, freeText, limit, session);
     }
 
 	private Object[] parseCalendarIds(String[] calendarIdStrings)

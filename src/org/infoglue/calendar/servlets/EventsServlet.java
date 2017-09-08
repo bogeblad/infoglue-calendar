@@ -109,7 +109,7 @@ public class EventsServlet extends HttpServlet
                 if(categoryNames != null)
                 	categoryNamesArray = categoryNames.split(",");
                             	        
-                Set events = EventController.getController().getEventList(calendarIds, categoryAttribute, categoryNamesArray, includedLanguages, startCalendar, endCalendar, freeText, session);
+                Set events = EventController.getController().getEventList(calendarIds, categoryAttribute, categoryNamesArray, includedLanguages, startCalendar, endCalendar, freeText, session, null);
                 
                 if(siteNodeId != null && !siteNodeId.equals(""))
                 	RemoteCacheUpdater.setUsage(new Integer(siteNodeId), calendarIds);
