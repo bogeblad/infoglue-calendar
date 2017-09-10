@@ -105,7 +105,8 @@ public class ViewEventListAction extends CalendarAbstractAction
     private String forwardMonthUrl		= null;
     private String backwardMonthUrl		= null;
     private String filterDescription	= null;
-    
+    private Boolean longListMode		= null;
+
     VisualFormatter vf = new VisualFormatter();
     
     /**
@@ -316,7 +317,11 @@ public class ViewEventListAction extends CalendarAbstractAction
 
     	if(numberOfItems == null)
     		numberOfItems = getNumberOfItems();
-    	
+
+		if (longListMode == null) {
+			longListMode = getLongListMode();
+		}
+
     	log.info("numberOfItems:" + numberOfItems);
     	log.info("freeText:" + freeText);
     	log.info("startDateTime:" + startDateTime);
@@ -324,6 +329,7 @@ public class ViewEventListAction extends CalendarAbstractAction
     	log.info("categoryAttribute:" + categoryAttribute);
     	log.info("categoryNames:" + categoryNames);
     	log.info("calendarMonth:" + calendarMonth);
+		log.info("longListMode: " + longListMode);
 
     	if(startDateTime != null && startDateTime.length() > 0)
             startCalendar = getCalendar(startDateTime, "yyyy-MM-dd", true); 
@@ -336,13 +342,13 @@ public class ViewEventListAction extends CalendarAbstractAction
         if(endDateTime != null && endDateTime.length() > 0)
         	endCalendar = getCalendar(endDateTime, "yyyy-MM-dd", true); 
         else
-        {
-        	endCalendar = java.util.Calendar.getInstance();
-            int lastDate = endCalendar.getActualMaximum(java.util.Calendar.DATE);
-            endCalendar.set(java.util.Calendar.DAY_OF_MONTH, lastDate); 
-        }
+		{
+			endCalendar = java.util.Calendar.getInstance();
+			int lastDate = endCalendar.getActualMaximum(java.util.Calendar.DATE);
+			endCalendar.set(java.util.Calendar.DAY_OF_MONTH, lastDate);
+		}
 
-        if(calendarMonth != null && calendarMonth.length() > 0)
+        if (calendarMonth != null && calendarMonth.length() > 0)
         {
         	calendarMonthCalendar = getCalendar(calendarMonth, "yyyy-MM", true); 
         	if(startDateTime == null || startDateTime.length() == 0)
@@ -369,7 +375,9 @@ public class ViewEventListAction extends CalendarAbstractAction
         }
         else
         {
-	        if(startCalendar.getTimeInMillis() == endCalendar.getTimeInMillis())
+			if (longListMode) {
+				filterDescription = null;
+			} else if(startCalendar.getTimeInMillis() == endCalendar.getTimeInMillis())
 	        	filterDescription = vf.formatDate(startCalendar.getTime(), getLocale(), "d MMMM");
 	        else
 	        	filterDescription = vf.formatDate(startCalendar.getTime(), getLocale(), "d MMMM") + " - " + vf.formatDate(endCalendar.getTime(), getLocale(), "d MMMM");
@@ -382,8 +390,12 @@ public class ViewEventListAction extends CalendarAbstractAction
         
         startCalendar.set(java.util.Calendar.HOUR_OF_DAY, 1);
         endCalendar.set(java.util.Calendar.HOUR_OF_DAY, 23);
+        if (longListMode) {
+			endCalendar = null;
+        }
+
         log.info("startCalendar:" + startCalendar.getTime());
-        log.info("endCalendar:" + endCalendar.getTime());
+        log.info("endCalendar:" + (endCalendar == null ? "null" : endCalendar.getTime()));
         
         String[] calendarIds = calendarId.split(",");
         String[] categoryNamesArray = categoryNames.split(",");
@@ -438,6 +450,10 @@ public class ViewEventListAction extends CalendarAbstractAction
     	if(numberOfItems == null)
     		numberOfItems = getNumberOfItems();
     	
+		if (longListMode == null) {
+			longListMode = getLongListMode();
+		}
+    	
     	log.info("numberOfItems:" + numberOfItems);
     	log.info("freeText:" + freeText);
     	log.info("startDateTime:" + startDateTime);
@@ -445,6 +461,7 @@ public class ViewEventListAction extends CalendarAbstractAction
     	log.info("categoryAttribute:" + categoryAttribute);
     	log.info("categoryNames:" + categoryNames);
     	log.info("calendarMonth:" + calendarMonth);
+    	log.info("longListMode: " + longListMode);
 
     	if(startDateTime != null && startDateTime.length() > 0)
             startCalendar = getCalendar(startDateTime, "yyyy-MM-dd", true); 
@@ -490,7 +507,9 @@ public class ViewEventListAction extends CalendarAbstractAction
         }
         else
         {
-	        if(startCalendar.getTimeInMillis() == endCalendar.getTimeInMillis())
+        	if (longListMode) {
+        		filterDescription = null;
+        	} else if(startCalendar.getTimeInMillis() == endCalendar.getTimeInMillis())
 	        	filterDescription = vf.formatDate(startCalendar.getTime(), getLocale(), "d MMMM");
 	        else
 	        	filterDescription = vf.formatDate(startCalendar.getTime(), getLocale(), "d MMMM") + " - " + vf.formatDate(endCalendar.getTime(), getLocale(), "d MMMM");
@@ -503,8 +522,13 @@ public class ViewEventListAction extends CalendarAbstractAction
         
         startCalendar.set(java.util.Calendar.HOUR_OF_DAY, 1);
         endCalendar.set(java.util.Calendar.HOUR_OF_DAY, 23);
+
+		if (longListMode) {
+			endCalendar = null;
+		}
+
         log.info("startCalendar:" + startCalendar.getTime());
-        log.info("endCalendar:" + endCalendar.getTime());
+        log.info("endCalendar:" + (endCalendar == null ? "null" : endCalendar.getTime()));
         
         String[] calendarIds = calendarId.split(",");
         String[] categoryNamesArray = categoryNames.split(",");
@@ -1014,6 +1038,11 @@ public class ViewEventListAction extends CalendarAbstractAction
         ActionContext.getContext().getValueStack().getContext().put("message", message);
         ActionContext.getContext().getValueStack().getContext().put("error", e);
     }
+
+	public void setLongListMode(boolean longListMode)
+	{
+		this.longListMode = longListMode;
+	}
 
 }
 

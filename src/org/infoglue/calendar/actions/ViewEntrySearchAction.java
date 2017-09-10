@@ -399,7 +399,8 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
         return this.entryAttributesMap.get(entryId);
     }
 
-    public ArrayList<ContentTypeAttributeParameterValue> getCustomAttributesTitleValues() {
+    public ArrayList<ContentTypeAttributeParameterValue> getCustomAttributesTitleValues()
+    {
         ArrayList<String> attrIds = new ArrayList<String>();
         ArrayList<ContentTypeAttributeParameterValue> labels = new ArrayList<ContentTypeAttributeParameterValue>();
         
@@ -415,13 +416,6 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
                     labels.add(val);
                     attrIds.add(identifier);
                 }
-                
-                System.out.println(attrIds);
-                System.out.print(identifier.getClass());
-
-                for(byte b: identifier.getBytes()) {
-                    System.out.println(b);
-                }
             }
 
         }
@@ -429,11 +423,13 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
         return labels;
     }
 
-    public Map<String, List<ContentTypeAttribute>> getCustomAttributesMap() {
+    public Map<String, List<ContentTypeAttribute>> getCustomAttributesMap()
+    {
         return this.entryAttributesMap;
     }
 
-    public ArrayList<String> getEntriesId() {
+    public ArrayList<String> getEntriesId()
+    {
         ArrayList<String> ids = new ArrayList<String>();
         
         Set<Entry> entries = this.getEntries();
