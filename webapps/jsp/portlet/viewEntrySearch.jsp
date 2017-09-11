@@ -243,7 +243,7 @@
 		}
 	</script>
 	<form name="confirmForm" action="<c:out value="${confirmUrl}"/>" method="post">
-		<input type="hidden" name="confirmTitle" value="Radera - bekr�fta"/>
+		<input type="hidden" name="confirmTitle" value="Radera - bekr&auml;fta"/>
 		<input type="hidden" name="confirmMessage" value="Fixa detta"/>
 		<input type="hidden" name="okUrl" value=""/>
 		<input type="hidden" name="cancelUrl" value="<c:out value="${viewListUrl}"/>"/>	

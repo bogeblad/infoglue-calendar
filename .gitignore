@@ -17,14 +17,6 @@ bin/
 *.swn
 *.swo
 *.swm
-*.*.swh
-.*.swh
-.*.swi
-*.*.swi
-.*.swj
-*.*.swj
-.*.swk
-*.*.swk
 ${deploy.dir.working}
 "\3729\346\347\340"
 ._.DS_Store
