@@ -28,9 +28,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,6 +57,8 @@ import org.infoglue.calendar.entities.EventVersion;
 import org.infoglue.calendar.entities.Location;
 import org.infoglue.calendar.util.EntrySearchResultfilesConstructor;
 import org.infoglue.common.contenttypeeditor.entities.ContentTypeAttribute;
+import org.infoglue.common.contenttypeeditor.entities.ContentTypeAttributeParameter;
+import org.infoglue.common.contenttypeeditor.entities.ContentTypeAttributeParameterValue;
 import org.infoglue.common.util.PropertyHelper;
 
 import com.opensymphony.webwork.ServletActionContext;
@@ -95,6 +99,7 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
 	private List resultValues = new LinkedList(); 
     
     private Map categoryAttributesMap = new HashMap();
+    private Map<String, List<ContentTypeAttribute>> entryAttributesMap = new HashMap<String, List<ContentTypeAttribute>>();
 
     private void initialize(Session session) throws Exception
     {
@@ -186,6 +191,9 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
         String emailAddresses = "";
         Long entryTypeId = null;
         Iterator entriesIterator = entries.iterator();
+
+        HttpSession session = ServletActionContext.getRequest().getSession();
+
         while(entriesIterator.hasNext())
         {
         	Entry entry = (Entry)entriesIterator.next();
@@ -198,10 +206,25 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
         			if(eventVersion != null)
         				name = eventVersion.getLocalizedName(this.getLanguageCode(), "sv");
         		}
+
+            
+
         		
         		eventName += (eventName.equals("") ? "" : ", ") + name;
         		events.add(entry.getEvent());
+
         	}
+
+                EventType eventType = EventTypeController.getController().getEventType(
+                entry.getEvent().getEntryFormId(),
+                getSession() 
+            );
+            this.entryAttributesMap.put(
+                Long.toString(entry.getId()),
+                ContentTypeDefinitionController.getController().getContentTypeAttributes(
+                    eventType.getSchemaValue()
+                )
+            );
         		        	
         	if(entryTypeId == null)
         		entryTypeId = entry.getEvent().getEntryFormId();
@@ -212,7 +235,7 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
                 emailAddresses += entry.getEmail();
         }
         
-        HttpSession session = ServletActionContext.getRequest().getSession();
+        
         
         this.searchHashCode = "" + ServletActionContext.getRequest().hashCode();
         log.debug("searchHashCode:" + searchHashCode);
@@ -248,10 +271,20 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
         	parameters.put("attributeNames", attributeNames);
 
         	HttpServletRequest request = ServletActionContext.getRequest();
-        	EntrySearchResultfilesConstructor results = new EntrySearchResultfilesConstructor(parameters, entries, getTempFilePath(), request.getScheme(), request.getServerName(), request.getServerPort(), resultValues, this, entryTypeId.toString());
+        	EntrySearchResultfilesConstructor results = new EntrySearchResultfilesConstructor(
+                        parameters,
+                        entries,
+                        getTempFilePath(),
+                        request.getScheme(),
+                        request.getServerName(),
+                        request.getServerPort(),
+                        resultValues,
+                        this,
+                        entryTypeId.toString()
+                        );
         	searchResultFiles = results.getResults();
         }
-        
+
         return Action.SUCCESS;
     } 
 
@@ -360,12 +393,54 @@ public class ViewEntrySearchAction extends CalendarAbstractAction
     {
         this.searchLastName = searchLastName;
     }
-    /*
-    public String getEmailAddresses()
+
+    public List<ContentTypeAttribute> getCustomAttributes(String entryId)
     {
-        return emailAddresses;
+        return this.entryAttributesMap.get(entryId);
     }
-    */
+
+    public ArrayList<ContentTypeAttributeParameterValue> getCustomAttributesTitleValues()
+    {
+        ArrayList<String> attrIds = new ArrayList<String>();
+        ArrayList<ContentTypeAttributeParameterValue> labels = new ArrayList<ContentTypeAttributeParameterValue>();
+        
+
+        for (String entryId: this.getEntriesId()) {
+
+            for (ContentTypeAttribute attr: this.entryAttributesMap.get(entryId)) {
+                ContentTypeAttributeParameterValue val = attr.getContentTypeAttribute("title").getContentTypeAttributeParameterValue();
+
+                String identifier = val.getValue("id");
+                
+                if (!attrIds.contains(identifier)) {
+                    labels.add(val);
+                    attrIds.add(identifier);
+                }
+            }
+
+        }
+
+        return labels;
+    }
+
+    public Map<String, List<ContentTypeAttribute>> getCustomAttributesMap()
+    {
+        return this.entryAttributesMap;
+    }
+
+    public ArrayList<String> getEntriesId()
+    {
+        ArrayList<String> ids = new ArrayList<String>();
+        
+        Set<Entry> entries = this.getEntries();
+
+        for (Entry e: entries) {
+            ids.add(Long.toString(e.getId()));
+        }
+
+        return ids;
+    }
+
 	public void setOnlyFutureEvents(boolean onlyFutureEvents)
 	{
 		this.onlyFutureEvents = onlyFutureEvents;

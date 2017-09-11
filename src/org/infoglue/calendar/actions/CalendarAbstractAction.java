@@ -82,6 +82,7 @@ import org.infoglue.calendar.util.AttributeType;
 import org.infoglue.common.security.beans.InfoGluePrincipalBean;
 import org.infoglue.common.util.VisualFormatter;
 import org.infoglue.common.exceptions.ConstraintException;
+import org.infoglue.common.exceptions.SystemException;
 import org.infoglue.common.util.ActionValidatorManager;
 import org.infoglue.common.util.ConstraintExceptionBuffer;
 import org.infoglue.common.util.PropertyHelper;
@@ -384,6 +385,30 @@ public class CalendarAbstractAction extends ActionSupport
     {
         return (String)ServletActionContext.getRequest().getAttribute("presentationTemplate");
     }
+
+	/**
+	 * Returns the value of the attribute in the request. If the attribute in the request is a string
+	 * it will be parsed into a Boolean using {@linkplain Boolean#valueOf(String)}.
+	 *
+	 * @throws SystemException thrown if the value in the request is of the wrong type
+	 */
+	public Boolean getLongListMode() throws SystemException
+	{
+		Object value = null;
+		try {
+			value = ServletActionContext.getRequest().getAttribute("longListMode");
+			if (value == null) {
+				return false;
+			}
+			if (value instanceof Boolean) {
+				return (Boolean)value;
+			} else {
+				return Boolean.valueOf((String)value);
+			}
+		} catch (ClassCastException ex) {
+			throw new SystemException("The given longListMode is not a Boolean nor a String. Value: " + value);
+		}
+	}
 
     public InfoGluePrincipalBean getInfoGluePrincipal() throws Exception
     {

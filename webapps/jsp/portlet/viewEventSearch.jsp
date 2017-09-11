@@ -15,7 +15,7 @@
 				   <a href="<ww:property value="value"/>" title="<ww:property value="key"/>"><img src="<%=request.getContextPath()%>/images/excelIcon.jpg" border="0"/></a>
 				</ww:iterator>
 			</ww:if>
-		</ww:if>		
+		</ww:if>
 	
     </h1>
 </div>
@@ -50,6 +50,10 @@
 	</c:if>
 </portlet:renderURL>
 
+<portlet:renderURL var="confirmUrl">
+	<portlet:param name="action" value="Confirm"/>
+</portlet:renderURL>
+
 <script type="text/javascript">
 	function submitDelete(okUrl, confirmMessage)
 	{
@@ -66,7 +70,7 @@
 	}
 </script>
 <form name="confirmForm" action="<c:out value="${confirmUrl}"/>" method="post">
-	<input type="hidden" name="confirmTitle" value="Radera - bekräfta"/>
+	<input type="hidden" name="confirmTitle" value="Radera - bekr&auml;fta"/>
 	<input type="hidden" name="confirmMessage" value="Fixa detta"/>
 	<input type="hidden" name="okUrl" value=""/>
 	<input type="hidden" name="cancelUrl" value="<c:out value="${viewListUrl}"/>"/>	
@@ -159,7 +163,7 @@
 	   	</div>
 	   	<div class="columnEnd">
 		   	<ww:if test="this.getIsEventOwner(top)">
-		   		<a href="javascript:submitDelete('<c:out value="${deleteUrl}"/>', 'Är du säker på att du vill radera &quot;<ww:property value="#eventVersion.name"/>&quot;');" title="Radera '<ww:property value="#eventVersion.name"/>'" class="delete"></a>
+		   		<a href="javascript:submitDelete('<c:out value="${deleteUrl}"/>', '&Auml;r du s&auml;ker p&aring; att du vill radera &quot;<ww:property value="#eventVersion.name"/>&quot;');" title="Radera '<ww:property value="#eventVersion.name"/>'" class="delete"></a>
 		   	</ww:if>
 	   	   	<a href="<c:out value="${eventUrl}"/>" title="Redigera '<ww:property value="#eventVersion.name"/>'" class="edit"></a>
 	   	</div>
