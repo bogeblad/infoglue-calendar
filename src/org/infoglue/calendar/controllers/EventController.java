@@ -825,8 +825,9 @@ public class EventController extends BasicController
 		Event event = getEvent(id, session);
 		event.setStateId(Event.STATE_PUBLISH);
 		EventVersion eventVersion = getEventVersion(event, languageCode, session);
+
 		
-        if(useEventPublishing())
+        if(useEventPublishing(event.getOwningCalendar(), session))
         {
             try
             {
@@ -856,17 +857,7 @@ public class EventController extends BasicController
 		new RemoteCacheUpdater().updateRemoteCaches(event.getCalendars());
 		//new RemoteCacheUpdater().updateRemoteCaches(event.getOwningCalendar().getId());
 
-                Property propMailEnabled = null;
-
-                String propMailEnabledKey = "CAL" + "_" + id + "_mailEnabled";                        
-
-                        propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(
-                    propMailEnabledKey,
-                    propMailEnabledKey,
-                    session
-                    );
-		
-        if(useGlobalEventNotification() && !propMailEnabled.getValue().equals("0") && !propMailEnabled.getValue().equals(""))
+        if(useGlobalEventNotification())
         {
             try
             {
@@ -878,7 +869,7 @@ public class EventController extends BasicController
             }
         }
 
-    }    
+    }
     
     /**
      * This method returns a Event based on it's primary key inside a transaction
@@ -1978,15 +1969,17 @@ public class EventController extends BasicController
 	        
 		    Map parameters = new HashMap();
 
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                    String startDate = formatter.format(event.getStartDateTime().getTime());
-		    
-		    parameters.put("principal", infoGluePrincipal);
-		    parameters.put("event", event);
-                    parameters.put("startDate", startDate);
-		    parameters.put("eventVersion", eventVersion);
-		    parameters.put("publishEventUrl", publishEventUrl.replaceAll("\\{eventId\\}", event.getId().toString()));
-		    
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			String startDate = formatter.format(event.getStartDateTime().getTime());
+
+			parameters.put("principal", infoGluePrincipal);
+			parameters.put("event", event);
+			parameters.put("startDate", startDate);
+			parameters.put("eventVersion", eventVersion);
+			parameters.put("owningCalendarName", event.getOwningCalendar().getName());
+
+			parameters.put("publishEventUrl", publishEventUrl.replaceAll("\\{eventId\\}", event.getId().toString()));
+
 			StringWriter tempString = new StringWriter();
 			PrintWriter pw = new PrintWriter(tempString);
 			new VelocityTemplateProcessor().renderTemplate(parameters, pw, template);

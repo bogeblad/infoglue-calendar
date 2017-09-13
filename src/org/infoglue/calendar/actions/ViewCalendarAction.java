@@ -541,16 +541,14 @@ public class ViewCalendarAction extends CalendarAbstractAction
     public String getMailEnabled() throws Exception {
         Property propMailEnabled = null;
 
-        String propMailEnabledKey = "CAL" + "_" + getCalendarId() + "_mailEnabled";
+		String namespace = "CAL_mailDisabled";
+		String key = "cal_" + calendarId;
 
-        propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(
-                propMailEnabledKey,
-                propMailEnabledKey,
-                getSession()
-                );
+		propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(namespace, key, getSession());
 
-        if (propMailEnabled == null) { return "0"; }
-
-        return propMailEnabled.getValue();
-    }
+		if (propMailEnabled == null) {
+			return "0";
+		}
+		return propMailEnabled.getValue();
+	}
 }

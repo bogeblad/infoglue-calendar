@@ -23,20 +23,13 @@
 
 package org.infoglue.calendar.actions;
 
-import java.util.List;
-
-import javax.portlet.PortletURL;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.infoglue.calendar.controllers.CalendarController;
 import org.infoglue.calendar.controllers.CalendarSettingsController;
-import org.infoglue.calendar.controllers.LocationController;
-import org.infoglue.calendar.databeans.AdministrationUCCBean;
-import org.infoglue.calendar.entities.Calendar;
-import org.infoglue.common.util.DBSessionWrapper;
 
 import com.opensymphony.webwork.ServletActionContext;
 import com.opensymphony.xwork.Action;
-import com.opensymphony.xwork.ActionContext;
 import com.opensymphony.xwork.validator.ValidationException;
 
 import org.infoglue.common.settings.entities.Property;
@@ -49,6 +42,8 @@ import org.infoglue.common.settings.entities.Property;
 
 public class UpdateCalendarAction extends CalendarAbstractAction
 {
+	private static Log log = LogFactory.getLog(UpdateCalendarAction.class);
+
     private Long calendarId;
     private String name;
     private String description;
@@ -80,41 +75,23 @@ public class UpdateCalendarAction extends CalendarAbstractAction
 
             Property propMailEnabled = null;
 
-            String propMailEnabledKey = "CAL" + "_" + calendarId + "_mailEnabled";
+			String namespace = "CAL_mailDisabled";
+			String key = "cal_" + calendarId;
+			String value = mailEnabled ? "1" : "0";
 
-            propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(
-                    propMailEnabledKey,
-                    propMailEnabledKey,
-                    getSession()
-                    );
+            propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(namespace, key, getSession());
 
             if (propMailEnabled == null) {
-                CalendarSettingsController.getCalendarSettingsController().createProperty(
-                    propMailEnabledKey,
-                    propMailEnabledKey,
-                    ((mailEnabled == true) ? "1" : "0"),
-                    getSession()
-                    );
+                CalendarSettingsController.getCalendarSettingsController().createProperty(namespace, key, value, getSession());
             } else {
-                 CalendarSettingsController.getCalendarSettingsController().updateProperty(
-                    propMailEnabledKey,
-                    propMailEnabledKey,
-                    ((mailEnabled == true) ? "1" : "0"),
-                    getSession()
-                    );
+                 CalendarSettingsController.getCalendarSettingsController().updateProperty(namespace, key, value, getSession());
             }
-
-            propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(
-                    propMailEnabledKey,
-                    propMailEnabledKey,
-                    getSession()
-                    );
 
             CalendarController.getController().updateCalendar(calendarId, name, description, roles, groups, eventTypeId, getSession());
         }
         catch(ValidationException e)
         {
-            return Action.ERROR;            
+            return Action.ERROR;
         }
         
         return Action.SUCCESS;
