@@ -45,6 +45,7 @@ import org.infoglue.calendar.entities.Location;
 import org.infoglue.calendar.entities.Participant;
 import org.infoglue.calendar.entities.Role;
 import org.infoglue.calendar.entities.Subscriber;
+import org.infoglue.calendar.controllers.CalendarSettingsController;
 import org.infoglue.calendar.util.EventComparator;
 import org.infoglue.common.security.beans.InfoGluePrincipalBean;
 import org.infoglue.common.security.beans.InfoGlueRoleBean;
@@ -55,7 +56,7 @@ import org.infoglue.common.util.VelocityTemplateProcessor;
 import org.infoglue.common.util.WebServiceHelper;
 import org.infoglue.common.util.io.FileHelper;
 import org.infoglue.common.util.mail.MailServiceFactory;
-
+import org.infoglue.common.settings.entities.Property;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -824,8 +825,9 @@ public class EventController extends BasicController
 		Event event = getEvent(id, session);
 		event.setStateId(Event.STATE_PUBLISH);
 		EventVersion eventVersion = getEventVersion(event, languageCode, session);
+
 		
-        if(useEventPublishing())
+        if(useEventPublishing(event.getOwningCalendar(), session))
         {
             try
             {
@@ -854,7 +856,7 @@ public class EventController extends BasicController
 
 		new RemoteCacheUpdater().updateRemoteCaches(event.getCalendars());
 		//new RemoteCacheUpdater().updateRemoteCaches(event.getOwningCalendar().getId());
-		
+
         if(useGlobalEventNotification())
         {
             try
@@ -867,7 +869,7 @@ public class EventController extends BasicController
             }
         }
 
-    }    
+    }
     
     /**
      * This method returns a Event based on it's primary key inside a transaction
@@ -1967,15 +1969,17 @@ public class EventController extends BasicController
 	        
 		    Map parameters = new HashMap();
 
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                    String startDate = formatter.format(event.getStartDateTime().getTime());
-		    
-		    parameters.put("principal", infoGluePrincipal);
-		    parameters.put("event", event);
-                    parameters.put("startDate", startDate);
-		    parameters.put("eventVersion", eventVersion);
-		    parameters.put("publishEventUrl", publishEventUrl.replaceAll("\\{eventId\\}", event.getId().toString()));
-		    
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			String startDate = formatter.format(event.getStartDateTime().getTime());
+
+			parameters.put("principal", infoGluePrincipal);
+			parameters.put("event", event);
+			parameters.put("startDate", startDate);
+			parameters.put("eventVersion", eventVersion);
+			parameters.put("owningCalendarName", event.getOwningCalendar().getName());
+
+			parameters.put("publishEventUrl", publishEventUrl.replaceAll("\\{eventId\\}", event.getId().toString()));
+
 			StringWriter tempString = new StringWriter();
 			PrintWriter pw = new PrintWriter(tempString);
 			new VelocityTemplateProcessor().renderTemplate(parameters, pw, template);
@@ -2038,6 +2042,8 @@ public class EventController extends BasicController
 				systemEmailSender = "infoglueCalendar@" + PropertyHelper.getProperty("mail.smtp.host");
 
 			log.info("Sending mail to:" + systemEmailSender + " and " + subscriberEmails);
+
+
 			MailServiceFactory.getService().send(systemEmailSender, subscriberEmails, null, "InfoGlue Calendar - new event published", email, contentType, "UTF-8", null);
 	    
 			String subscriberString = "";

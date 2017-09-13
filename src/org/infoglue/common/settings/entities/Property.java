@@ -116,4 +116,9 @@ public abstract class Property implements BaseEntity
 		return this.getName();
 	}
 
+	@Override
+	public String toString() {
+		return "Property [id=" + id + ", nameSpace=" + nameSpace + ", name=" + name + ", value=" + value + "]";
+	}
+
 }

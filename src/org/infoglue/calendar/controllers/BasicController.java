@@ -24,7 +24,6 @@
 package org.infoglue.calendar.controllers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -33,13 +32,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import org.infoglue.calendar.entities.Calendar;
 import org.infoglue.calendar.entities.Event;
 import org.infoglue.calendar.entities.Group;
 import org.infoglue.common.security.beans.InfoGluePrincipalBean;
+import org.infoglue.common.settings.entities.Property;
 import org.infoglue.common.util.PropertyHelper;
-import org.infoglue.common.util.WebServiceHelper;
 
 /**
  * This class represents the basic controller which all other controllers inherits from.
@@ -49,13 +47,31 @@ import org.infoglue.common.util.WebServiceHelper;
 
 public abstract class BasicController
 {
-    
-    public boolean useEventPublishing()
-    {
-        String useEventPublishing = PropertyHelper.getProperty("useEventPublishing");
-        
-        return (useEventPublishing.equalsIgnoreCase("true") ? true : false);
-    }
+	private static Log log = LogFactory.getLog(BasicController.class);
+
+	public boolean useEventPublishing(Calendar owningCalendar, Session session)
+	{
+		String useEventPublishing = PropertyHelper.getProperty("useEventPublishing");
+		boolean result = (useEventPublishing.equalsIgnoreCase("true") ? true : false);
+
+		if (result) {
+			log.info("Use event publishing is active. Checking if calendar allows email. Calendar " + owningCalendar);
+			if (owningCalendar != null) {
+				try {
+					String namespace = "CAL_mailDisabled";
+					String key = "cal_" + owningCalendar.getId();
+					Property propMailEnabled = CalendarSettingsController.getCalendarSettingsController().getProperty(namespace, key, session);
+					log.info("Mail disabled property: " + propMailEnabled);
+					if (propMailEnabled != null && propMailEnabled.getValue().equals("1")) {
+						result = false;
+					}
+				} catch (Exception e) {
+					log.error("Error when checking for mail disabled property. Message: " + e.getMessage());
+				}
+			}
+		}
+		return result;
+	}
 
     public boolean useGlobalEventNotification()
     {
